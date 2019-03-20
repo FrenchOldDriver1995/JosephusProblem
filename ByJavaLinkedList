@@ -1,0 +1,143 @@
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.Scanner;
+class Node<E>{
+	//节点
+	private Node<E> next;//指向下一位，指针域
+	private Node<E> prev;//指向上一位，指针域
+	private E e;//数据域
+	public Node() {}
+	public Node(E e) {this.e=e;}
+	
+	public Node<E> getNext(){
+		return next;
+	}
+	public void setNext(Node<E> n) {
+		next=n;
+	}
+	public E getE() {return e;}
+	public void setE(E e) {this.e=e;}
+	
+}
+class MyLinkedList<E>{
+	private Node<E> head;
+	private Node<E> last;
+	private int size=0;//0是放head节点的
+	public  MyLinkedList() {
+		head = new Node<E>();//直接实例化头节点，才表示有一个链表的存在
+		last = head; //初始化，首就是尾
+	}
+	public int size() {
+		return size;
+	}
+	
+	//下面实现增删改查功能
+	public void add(E e) {//增加节点应该有两种方式，有加末尾和中间插入
+		Node<E> temp = new Node<E>(e);//把值放入节点中
+		last.setNext(temp);//把下一个设为temp
+		last = temp;//然后把temp设成新的last
+		size++;
+	}
+	public void insert(int index,E e) {//在某个位置插入
+		Node<E> node=head;
+		Node<E> temp=new Node<E>(e);
+		if(index>0&&index<=size) {
+			for(int i=1;i<=index-1;i++){//推到插入位的上一位
+				node = node.getNext();
+			}
+			temp.setNext(node.getNext());//先把插入位和临时节点连上,注意不是插入位的下一位，不然变成替换了
+			node.setNext(temp);//再把上一位和临时点连上
+			size++;
+		}
+	}
+	public E getE(int index) {//查
+		Node<E> node=head;
+		if(index>0&&index<=size) {
+			for(int i=1;i<=index;i++){
+				node = node.getNext();
+			}
+			return node.getE();
+		}
+		else return null;
+	}
+	public void change(int index,E e) {//改
+		Node<E> node=head;
+		if(index>0&&index<=size) {
+			for(int i=1;i<=index;i++) {//推到index这一位
+				node =node.getNext();
+			}
+			node.setE(e);
+			
+		}
+		else System.out.println("wrong index");
+	}
+	public void delete(int index) {
+		Node<E> node=head;
+		if(index>0&&index<=size) {
+			//思路，就是上一个的next直接指向删除位的next
+			for(int i=1;i<=index-1;i++) {//推到index上一位
+				node =node.getNext();
+			}
+			node.setNext(node.getNext().getNext());
+			size--;
+		}
+		else System.out.println("invalid delete");
+	}
+	public void deleteAll() {
+		//即删除头节点
+		try {
+		head.setNext(null);
+		size=0;
+		System.out.println("delete successed");
+		}catch(NullPointerException e) {e.getStackTrace();}
+	}
+	public void Circle()  {
+		//首尾相连，谨慎使用
+		Node<E> n=head;
+		while(n.getNext()!=null)n=n.getNext();
+		n.setNext(head.getNext());//把尾项接在head的下一项
+		//成功变环
+	}
+}
+public class 链表{
+	public static void main(String[] args) throws InterruptedException {
+		MyLinkedList<Object> MLL = new MyLinkedList<>();
+		/*MLL.add(1);MLL.add(2);MLL.add(3);MLL.add(4);
+		MLL.change(4, 5);
+		MLL.insert(2, 10);
+		
+		//注意这个链表由于从第1位开始存数据，所以=size的时候也是要输出的
+		//for(int i=0;i<=MLL.size();i++) System.out.println(MLL.getE(i));
+		
+		System.out.println("its size == "+MLL.size());*/
+		//然后可以思考腾讯笔试第一题，排位置那个问题---约瑟夫环
+		Scanner in = new Scanner(System.in);
+		int m=0,n=0,s=0,counter=0;
+		while(in.hasNext()) {
+			m=in.nextInt();counter++;//总人数
+			n=in.nextInt();counter++;//从第s个人开始报数
+			s=in.nextInt();counter++;//报第m次数的人出去
+			if(counter==3)break;
+		}
+		
+		//初始化圆桌人数
+		int rotate=n;
+		for(int i=1;i<=m;i++) {
+			MLL.add(i);
+		}
+		MLL.Circle();//谨慎使用
+		//System.out.println(MLL.getE(5));
+		
+		while(MLL.size()>=1) {
+			Thread.sleep(500);//降低速度
+		rotate=rotate+s-1;
+		if(rotate!=0)rotate=rotate%MLL.size();//这里有一个膜了=0的情况
+		if(rotate==0)rotate=MLL.size();
+		System.out.println("deleted  ---> the  "+MLL.getE(rotate)+" person");
+		//if(rotate==0)System.out.println("deleted--->"+);
+		MLL.delete(rotate);
+		}
+		
+	}
+}
